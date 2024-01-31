@@ -64,10 +64,10 @@ if __name__ == '__main__':
         input_len = 128
         pred_len = 60
     
-    foundation_path= f'../checkpoints/GTT-{mode}-200M'
+    foundation_path= f'../checkpoints/GTT-{mode}'
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
-        model = GTT.from_tsfoundation(signals, foundation_path)
+        model = GTT.from_tsfoundation(signals, foundation_path, cp='cp.ckpt')
         y_pred,y_true = model.predict(test_df,input_len,pred_len,batch_size=batch_size)
     
     if pred_len == 720:

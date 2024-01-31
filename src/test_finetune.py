@@ -67,7 +67,7 @@ if __name__ == '__main__':
         input_len = 128
         pred_len = 60
     
-    foundation_path= f'../checkpoints/GTT-{mode}-200M'
+    foundation_path= f'../checkpoints/GTT-{mode}'
     pm = TSFoundation.load_model(foundation_path)
     
     cp=f'../checkpoints/GTT-finetune'

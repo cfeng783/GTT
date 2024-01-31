@@ -307,6 +307,7 @@ class GTT:
         model.du = DataUtil(signals, scaling_method='standard')
         model._meta_init()        
         pm = TSFoundation.load_model(model_path=foundation_path,cp=cp)
+        pm.save_model(foundation_path)
         model.configs.enable_revin = True
         model.configs.affine = False
         model.configs.revin_time = True
