@@ -1,17 +1,16 @@
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
 
-class DataHandler():
+class DataHandler:
     '''
-    Data Generator for the inference phase
+    Data Handler
     
     Parameters
     ----------
     block_size : int
-        the context length
-    patch_size : int
-        the patch size
+        the length range
+    pred_len : int
+        the forecast range
     targets : list of strings
         the target variables
     covariates : list of strings
@@ -21,12 +20,8 @@ class DataHandler():
     du : DataUtil
         data utility
     '''
-    def __init__(self, block_size, patch_size, targets, covariates, timefeats, du):
-        self.block_size = block_size
-        self.patch_size = patch_size
+    def __init__(self, block_size, pred_len, targets, covariates, timefeats, du):
         self.du = du
-        # Work out the window parameters.
-        
         self.column_indices = {name: i for i, name in enumerate(du.column_names())}
         self.targets = targets
         self.covariates = covariates
@@ -38,9 +33,13 @@ class DataHandler():
         
         self.input_indices = self.target_indices+self.covariate_indices+self.timefeat_indices
         
+        # Work out the window parameters.
+        self.block_size = block_size
+        self.pred_len = pred_len
+        
     def _split_window_train(self, features):
         input_slice = slice(0, self.block_size)
-        train_output_slice = slice(self.block_size, self.block_size+self.patch_size)
+        train_output_slice = slice(self.block_size, self.block_size+self.pred_len)
 
         
         inputs = features[:, input_slice, :]
@@ -52,7 +51,7 @@ class DataHandler():
         # Slicing doesn't preserve static shape information, so set the shapes
         # manually. This way the `tf.data.Datasets` are easier to inspect.
         inputs.set_shape([None, self.block_size, len(self.input_indices)])
-        outputs.set_shape([None, self.patch_size, len(self.target_indices)])
+        outputs.set_shape([None, self.pred_len, len(self.target_indices)])
 
         return inputs, outputs
     
@@ -95,10 +94,14 @@ class DataHandler():
             a tf.data.Dataset object
         """
         data = np.array(data, dtype=np.float32)
+        if len(data) < 1088:
+            pre_dummy = np.zeros(shape=(1024-64,data.shape[1]))
+            data = np.vstack((pre_dummy,data))
+        
         ds = tf.keras.preprocessing.timeseries_dataset_from_array(
               data=data,
               targets=None,
-              sequence_length=self.block_size+self.patch_size,
+              sequence_length=self.block_size+self.pred_len,
               sequence_stride=1,
               shuffle=True,
               batch_size=batch_size,)
@@ -148,83 +151,3 @@ class DataHandler():
         x, y, z = np.concatenate(x_list), np.concatenate(y_list), np.concatenate(z_list)
         return x, y, z
     
-    
-    def denormalize(self,obs_x,forecast_x):
-        """
-        denormalize target variables
-    
-        Parameters
-        ----------
-        obs_x : ndarray
-            the ground truth data, matrix of shape = [n_samples, n_features]
-        forecast_x : ndarray
-            the predicted data, matrix of shape = [n_samples, n_features]
-    
-        Returns
-        -------
-        ndarray 
-            the denormalized ground truth data
-        ndarray 
-            the denormalized predicted data
-        """
-    
-        obs_x = self.du.denormalize(obs_x,self.targets)
-        forecast_x = self.du.denormalize(forecast_x,self.targets)
-        return obs_x,forecast_x
-    
-    def plotRes(self,obs_x,forecast_x,start_pos=None,prefix=''):
-        """
-        plot prediction compared with inputs
-    
-        Parameters
-        ----------
-        obs_x : ndarray
-            the ground truth data, matrix of shape = [n_samples, n_features]
-        forecast_x : ndarray
-            the predicted data, matrix of shape = [n_samples, n_features]
-        """
-        timeline = np.linspace(0,len(obs_x),len(obs_x)) 
-        colors = ['r','g','b','c','m','y']
-    
-        plt.figure(1)
-        k = 0
-        for target_var in self.targets:
-            plt.subplot(len(self.targets),1,1+k)
-            plt.plot(timeline[-len(forecast_x):], forecast_x[:,k], colors[k%6]+"-",label='prediction')
-            plt.plot(timeline,obs_x[:,k],"k-",label='ground truth')
-            if start_pos is not None:
-                plt.axvline(x = start_pos, ls='--',color="y")
-            
-            plt.legend(loc='best', prop={'size': 6})
-            plt.title(prefix+target_var)
-            k+=1
-        plt.show()
-    
-    def plotResWithCI(self,obs_x,forecast_x,forecast_std,start_pos=None,prefix=''):
-        """
-        plot prediction compared with inputs
-    
-        Parameters
-        ----------
-        obs_x : ndarray
-            the ground truth data, matrix of shape = [n_samples, n_features]
-        forecast_x : ndarray
-            the predicted data, matrix of shape = [n_samples, n_features]
-        """
-        timeline = np.linspace(0,len(obs_x),len(obs_x)) 
-        colors = ['r','g','b','c','m','y']
-    
-        plt.figure(1)
-        k = 0
-        for target_var in self.targets:
-            plt.subplot(len(self.targets),1,1+k)
-            plt.plot(timeline[-len(forecast_x):], forecast_x[:,k], colors[k%6]+"-",label='prediction')
-            plt.fill_between(timeline, forecast_x[:,k]-forecast_std[:,k], forecast_x[:,k]+forecast_std[:,k], color='blue', alpha=0.1)
-            plt.plot(timeline,obs_x[:,k],"k-",label='ground truth')
-            if start_pos is not None:
-                plt.axvline(x = start_pos, ls='--',color="y")
-            
-            plt.legend(loc='best', prop={'size': 6})
-            plt.title(prefix+target_var)
-            k+=1
-        plt.show()
