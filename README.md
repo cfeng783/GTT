@@ -1,4 +1,4 @@
-# GTT
+# Only the Curve Shape Matters: Training Foundation Models for Zero-Shot Multivariate Time Series Forecasting through Next Curve Shape Prediction
 
 ## Getting Started
 
