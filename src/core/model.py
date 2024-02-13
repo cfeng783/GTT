@@ -1,7 +1,7 @@
 from tensorflow import keras
 from ..utils.data_handler import DataHandler
 import numpy as np
-from .network import TsfNetwork
+from .network import GTTNet
 import pickle,os
 from ..utils.signals import sigtype,ContinuousSignal,CategoricalSignal
 from ..utils.data_util import DataUtil
@@ -26,10 +26,10 @@ class ModelConfig:
     activation_dropout : float = 0.0
     attention_dropout : float = 0.0
     n_embd : int = 384
-    decoder_layers : int = 4
-    decoder_attention_heads : int = 6
-    decoder_layerdrop : float = 0.0
-    decoder_ffn_dim : int = 1536
+    encoder_layers : int = 4
+    encoder_attention_heads : int = 6
+    encoder_layerdrop : float = 0.0
+    encoder_ffn_dim : int = 1536
     
     ##the following shall only be adapted in the fine-tune stage
     enable_revin : bool = False
@@ -149,9 +149,9 @@ class GTT:
                 optimizer = tf.keras.optimizers.Adam()
             
             if pm is None:
-                model = TsfNetwork.build_raw_model(self.configs)
+                model = GTTNet.build_raw_model(self.configs)
             else:
-                model = TsfNetwork.from_pretrained(pm, self.configs)
+                model = GTTNet.from_pretrained(pm, self.configs)
             model.compile(optimizer=optimizer, loss='mae')
             checkpoint_path = os.path.join(cp,'GTT.ckpt')
             cp_callback = keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,save_best_only=True, save_weights_only=True)
@@ -282,9 +282,9 @@ class GTT:
         self.du = DataUtil(filename=os.path.join(model_path,'data_util.json'))
         self._meta_init()
         if pm is None:
-            model = TsfNetwork.build_raw_model(self.configs)
+            model = GTTNet.build_raw_model(self.configs)
         else:
-            model = TsfNetwork.from_pretrained(pm, self.configs)
+            model = GTTNet.from_pretrained(pm, self.configs)
         model.load_weights(model_path+'/GTT.h5')
         model.compile(optimizer='adam', loss='mae', run_eagerly=True)
         self.estimator = model
@@ -307,11 +307,11 @@ class GTT:
         model.du = DataUtil(signals, scaling_method='standard')
         model._meta_init()        
         pm = TSFoundation.load_model(model_path=foundation_path,cp=cp)
-        pm.save_model(foundation_path)
+        # pm.save_model(foundation_path)
         model.configs.enable_revin = True
         model.configs.affine = False
         model.configs.revin_time = True
-        model.estimator = TsfNetwork.from_pretrained(pm, model.configs)
+        model.estimator = GTTNet.from_pretrained(pm, model.configs)
         model.estimator.compile(optimizer='adam', loss='mae', run_eagerly=True)
         return model
 
@@ -393,7 +393,7 @@ class TSFoundation:
                 )
             
                      
-            self.estimator = TsfNetwork.build_raw_model(self.configs)
+            self.estimator = GTTNet.build_raw_model(self.configs)
             
             pickle.dump(asdict(self.configs),open(os.path.join(cp,'configs.pkl'),'wb'))
             
@@ -453,7 +453,7 @@ class TSFoundation:
         model = cls()
         configs = pickle.load(open(os.path.join(model_path,'configs.pkl'),'rb'))
         model.configs = ModelConfig(**configs)
-        model.estimator = TsfNetwork.build_raw_model(model.configs)
+        model.estimator = GTTNet.build_raw_model(model.configs)
         if cp is None:
             model.estimator.load_weights(model_path+'/tsfoundation.h5')
         else:

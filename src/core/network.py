@@ -1,9 +1,9 @@
 import tensorflow as tf
 from tensorflow import keras
-from .encoder import TSDecoder
+from .encoder import TSEncoder
 from .revin import RevIN
     
-class TsfNetwork(keras.Model):
+class GTTNet(keras.Model):
 
     def __init__(self, config, **kwargs):
         super().__init__(**kwargs)
@@ -21,7 +21,7 @@ class TsfNetwork(keras.Model):
         if self.enable_revin:
             self.revin = RevIN(affine=config.affine, dtype=tf.float32)
         
-        self.decoder = TSDecoder(config) ## It is actually an encoder, misnaming due to legacy issues
+        self.encoder = TSEncoder(config) ## It is actually an encoder, misnaming due to legacy issues
         
         if self.pred_len is None:
             self.mu_head = keras.layers.Dense(self.patch_size,activation='linear', name='mu_head', dtype=tf.float32)
@@ -48,7 +48,7 @@ class TsfNetwork(keras.Model):
         x_enc = tf.transpose(x_enc,perm=[0, 2, 1])
         x_enc = tf.reshape(x_enc,[-1, T])
         
-        x_dec = self.decoder(x_enc, patch_num, C)
+        x_dec = self.encoder(x_enc, patch_num, C)
         x_dec = x_dec[:,-1,:] ##B*C,n_embd
         
         
@@ -86,10 +86,10 @@ class TsfNetwork(keras.Model):
         mc.activation_dropout  = config_hf.activation_dropout
         mc.attention_dropout = config_hf.attention_dropout
         mc.n_embd  = config_hf.n_embd
-        mc.decoder_layers  = config_hf.decoder_layers
-        mc.decoder_attention_heads  = config_hf.decoder_attention_heads
-        mc.decoder_layerdrop  = config_hf.decoder_layerdrop
-        mc.decoder_ffn_dim  = config_hf.decoder_ffn_dim
+        mc.encoder_layers  = config_hf.encoder_layers
+        mc.encoder_attention_heads  = config_hf.encoder_attention_heads
+        mc.encoder_layerdrop  = config_hf.encoder_layerdrop
+        mc.encoder_ffn_dim  = config_hf.encoder_ffn_dim
             
         model = cls(mc)
         input_dim = mc.target_dim+mc.covariate_dim+mc.timefeat_dim
@@ -116,7 +116,7 @@ class TsfNetwork(keras.Model):
             assert sd_hf[k].shape == sd[local_key].shape  
             sd[local_key].assign(sd_hf[k])
         
-        model.decoder.trainable=False
+        model.encoder.trainable=False
         model.summary(expand_nested=True,show_trainable=True)
         # tf.keras.utils.plot_model(model,show_shapes=True)
         return model

@@ -4,10 +4,8 @@ from .embedding import TSConvPatchEmbedding,TSPositionalEncoding
 
 
 def get_max_embd_length(config):
-    # max_embed_length = config.block_size//config.patch_size + 1
-    # max_embed_length = max_embed_length+8-(max_embed_length%8) ##make multiple of eight for efficiency
-    # return max_embed_length
-    return 16
+    max_embed_length = config.block_size//config.patch_size
+    return max_embed_length
     
 class TSAttention(tf.keras.layers.Layer):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
@@ -57,7 +55,7 @@ class TSAttention(tf.keras.layers.Layer):
         """Input shape: Batch x Time x Channel"""
 
         # if key_value_states are provided this layer is used as a cross-attention layer
-        # for the decoder
+        # for the encoder
         _, tgt_len, embed_dim = shape_list(hidden_states)
         src_len = tgt_len
         # get query proj
@@ -95,13 +93,13 @@ class TSAttention(tf.keras.layers.Layer):
         return attn_output
 
 
-class TSDecoderLayer(tf.keras.layers.Layer):
+class TSEncoderLayer(tf.keras.layers.Layer):
     def __init__(self, config, **kwargs):
         super().__init__(**kwargs)
         self.embed_dim = config.n_embd
         
         self.self_attn = TSAttention(
-            self.embed_dim, config.decoder_attention_heads, 
+            self.embed_dim, config.encoder_attention_heads, 
             max_mask_len = get_max_embd_length(config),
             dropout=config.attention_dropout,name='self_attn'
         )
@@ -110,7 +108,7 @@ class TSDecoderLayer(tf.keras.layers.Layer):
         self.channel_attn_layer_norm = tf.keras.layers.LayerNormalization(epsilon=1e-5, name="channel_attn_layer_norm")
         self.dropout = tf.keras.layers.Dropout(config.dropout)
         self.activation_dropout = tf.keras.layers.Dropout(config.activation_dropout)
-        self.fc1 = tf.keras.layers.Dense(config.decoder_ffn_dim, name="fc1")
+        self.fc1 = tf.keras.layers.Dense(config.encoder_ffn_dim, name="fc1")
         self.fc2 = tf.keras.layers.Dense(self.embed_dim, name="fc2")
         self.final_layer_norm = tf.keras.layers.LayerNormalization(epsilon=1e-5, name="final_layer_norm")
 
@@ -119,14 +117,6 @@ class TSDecoderLayer(tf.keras.layers.Layer):
         patch_num,
         channel_num
     ):
-        """
-        Args:
-            hidden_states (`tf.Tensor`): input to the layer of shape `(batch, seq_len, embed_dim)`
-            attention_mask (`tf.Tensor`): attention mask of size
-                `(batch, 1, tgt_len, src_len)` where padding elements are indicated by very large negative values.
-            layer_head_mask (`tf.Tensor`): mask for attention heads in a given layer of size
-                `(decoder_attention_heads,)`
-        """
         ### cross time attention
         residual = hidden_states
         hidden_states = self.temporal_attn_layer_norm(hidden_states)
@@ -161,19 +151,11 @@ class TSDecoderLayer(tf.keras.layers.Layer):
 
         return hidden_states
 
-class TSDecoder(tf.keras.layers.Layer):
-    """
-    Transformer decoder consisting of *config.decoder_layers* self attention layers. Each layer is a
-    [`TFWhisperdecoderLayer`].
-
-    Args:
-        config: WhisperConfig
-        embed_tokens (TFWhisperEmbedding): output embedding
-    """
+class TSEncoder(tf.keras.layers.Layer):
 
     def __init__(self, config, **kwargs):
         super().__init__(**kwargs)
-        self.layerdrop = config.decoder_layerdrop
+        self.layerdrop = config.encoder_layerdrop
         self.embed_dim = config.n_embd
         
         self.max_embed_length = get_max_embd_length(config)
@@ -181,33 +163,10 @@ class TSDecoder(tf.keras.layers.Layer):
         
         self.patch_embedding = TSConvPatchEmbedding(config.patch_size, config.n_embd, config.block_size)
         self.dropout = tf.keras.layers.Dropout(config.embedd_pdrop)
-        self.decoder_layers = [TSDecoderLayer(config, name=f"layers.{i}") for i in range(config.decoder_layers)]
+        self.encoder_layers = [TSEncoderLayer(config, name=f"layers.{i}") for i in range(config.encoder_layers)]
         self.layer_norm = tf.keras.layers.LayerNormalization(epsilon=1e-5, name="layer_norm")
 
     def call(self, x, patch_num, channel_num):
-        r"""
-        Args:
-            input_features (`tf.Tensor` of shape `(batch_size, sequence_length, feature_size)`):
-                Float values of fbank features extracted from the raw speech waveform. Raw speech waveform can be
-                obtained by loading a `.flac` or `.wav` audio file into an array of type `List[float]` or a
-                `numpy.ndarray`, *e.g.* via the soundfile library (`pip install soundfile`). To prepare the array into
-                `input_features`, the [`AutoFeatureExtractor`] should be used for extracting the fbank features,
-                padding and conversion into a tensor of type `tf.Tensor`. See [`~WhisperFeatureExtractor.__call__`]
-            head_mask (`tf.Tensor` of shape `(decoder_layers, decoder_attention_heads)`, *optional*):
-                Mask to nullify selected heads of the attention modules. Mask values selected in `[0, 1]`:
-
-                - 1 indicates the head is **not masked**,
-                - 0 indicates the head is **masked**.
-
-            output_attentions (`bool`, *optional*):
-                Whether or not to return the attentions tensors of all attention layers. See `attentions` under
-                returned tensors for more detail.
-            output_hidden_states (`bool`, *optional*):
-                Whether or not to return the hidden states of all layers. See `hidden_states` under returned tensors
-                for more detail.
-            return_dict (`bool`, *optional*):
-                Whether or not to return a [`~utils.ModelOutput`] instead of a plain tuple.
-        """
 
         hidden_states = self.patch_embedding(x) 
         
@@ -220,8 +179,8 @@ class TSDecoder(tf.keras.layers.Layer):
         
         hidden_states = self.dropout(hidden_states)
         
-        for decoder_layer in self.decoder_layers:
-            hidden_states = decoder_layer(
+        for encoder_layer in self.encoder_layers:
+            hidden_states = encoder_layer(
                 hidden_states,patch_num,channel_num
             )
 

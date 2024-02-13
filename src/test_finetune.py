@@ -1,6 +1,6 @@
 import os,getopt
 import sys
-sys.path.insert(0, "../../../")
+sys.path.insert(0, "../")
 import numpy as np
 import logging
 logging.basicConfig(level=logging.ERROR,format='%(asctime)s %(name)s  %(levelname)s %(message)s')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
     strategy = tf.distribute.MirroredStrategy()
     with strategy.scope():
         model = model.load_model(cp)
-        y_pred,y_true,x_ture = model.predict_ft(test_df,input_len,pred_len,batch_size=batch_size*4)
+        y_pred,y_true = model.predict_ft(test_df,input_len,pred_len,batch_size=batch_size*4)
     
     if pred_len == 720:
         pred_lens = [96,192,336,720]
