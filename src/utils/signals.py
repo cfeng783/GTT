@@ -34,12 +34,8 @@ class ContinuousSignal(BaseSignal):
     ----------
     name : string
         the name of the signal
-    source : SignalSource
-        the source of the signal, can be SignalSource.sensor, SignalSource.controller or SignalSource.other
-    isInput : bool
-        whether it is an input of the model
-    isOutput : bool
-        whether it is an output of the model
+    stype : string
+        the type of the signal, can be sigtype.target, sigtype.covariate or sigtype.timefeat    
     min_value : float, default is None
         the minimal value for the signal
     max_value : float, default is None
@@ -75,12 +71,8 @@ class CategoricalSignal(BaseSignal):
     ----------
     name : string
         the name of the signal
-    source : SignalSource
-        the source of the signal, can be SignalSource.sensor, SignalSource.controller or SignalSource.other
-    isInput : bool
-        whether it is an input of the model
-    isOutput : bool
-        whether it is an output of the model
+    stype : string
+        the type of the signal, can be sigtype.target, sigtype.covariate or sigtype.timefeat    
     values : list
         the list of possible values for the signal
     

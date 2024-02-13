@@ -56,29 +56,6 @@ def process_datetime(df, date_col):
     return df, signals
 
 def load_ett_data(fp='../datasets/ETT/',name='ETTm1.csv', context_len=1024, uni=False):
-    """
-    load ETT dataset
-
-    Parameters
-    ----------
-    fp : string, default is '../datasets/PUMP'
-        the path of the folder where the dataset locates
-
-    Returns
-    -------
-    Dataframe 
-        the training dataframe
-
-    Dataframe 
-        the testing dataframe
-
-    ndarray 
-        the testing labels
-
-    list 
-        the list of signals
-
-    """
     df = pd.read_csv(fp+name)
     df,signals = process_datetime(df, date_col='date')  
     

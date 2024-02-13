@@ -21,7 +21,7 @@ class GTTNet(keras.Model):
         if self.enable_revin:
             self.revin = RevIN(affine=config.affine, dtype=tf.float32)
         
-        self.encoder = TSEncoder(config) ## It is actually an encoder, misnaming due to legacy issues
+        self.encoder = TSEncoder(config)
         
         if self.pred_len is None:
             self.mu_head = keras.layers.Dense(self.patch_size,activation='linear', name='mu_head', dtype=tf.float32)
