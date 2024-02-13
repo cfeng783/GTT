@@ -83,7 +83,7 @@ class DataHandler:
         
         Parameters
         ----------
-        data : ndarray or list of ndarray
+        data : ndarray
             the numpy array from where the samples are extracted
         batch_size : int
             the batch_size
