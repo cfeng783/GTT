@@ -28,4 +28,4 @@ python test_finetune.py --gpu [GPUs] --batch_size [BS] --mode [mode] --data [DS]
 ```
 
 ### Use GTT model for zero-shot forecast for your own data
-It is rather straightforward to use GTT models for zero-shot forecast for your own data, check the [tutorial](./tutorial.ipynb).
+It is rather straightforward to use GTT models for zero-shot forecast on your own data, check the [tutorial](./tutorial.ipynb).
