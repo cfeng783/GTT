@@ -26,3 +26,6 @@ Specify uni to 0 or 1, 0: multivariate forecast, 1: univariate forecast
 cd experiments
 python test_finetune.py --gpu [GPUs] --batch_size [BS] --mode [mode] --data [DS] --uni [uni] --epochs [eps]
 ```
+
+### Use GTT model for zero-shot forecast for your time series data
+It is rather straightforward to use GTT models for zero-shot forecast for your own data, check the [tutorial](./tutorial.ipynb).
