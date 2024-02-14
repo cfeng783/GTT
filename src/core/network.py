@@ -70,7 +70,7 @@ class GTTNet(keras.Model):
         model = cls(mc)
         input_dim = mc.target_dim+mc.covariate_dim+mc.timefeat_dim
         model.build(input_shape=(4,mc.block_size,input_dim)) 
-        model.summary(expand_nested=True,show_trainable=True)
+        # model.summary(expand_nested=True,show_trainable=True)
         return model
     
     @classmethod
@@ -112,12 +112,12 @@ class GTTNet(keras.Model):
         for k in sd_hf:  
             # vanilla copy over the other parameters
             local_key = k
-            print('assign',k,'to',local_key,'shape',sd_hf[k].shape,sd[local_key].shape)
+            # print('assign',k,'to',local_key,'shape',sd_hf[k].shape,sd[local_key].shape)
             assert sd_hf[k].shape == sd[local_key].shape  
             sd[local_key].assign(sd_hf[k])
         
         model.encoder.trainable=False
-        model.summary(expand_nested=True,show_trainable=True)
+        # model.summary(expand_nested=True,show_trainable=True)
         # tf.keras.utils.plot_model(model,show_shapes=True)
         return model
     
