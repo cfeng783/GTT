@@ -42,11 +42,9 @@ class TSAttention(tf.keras.layers.Layer):
         self.q_proj = tf.keras.layers.Dense(embed_dim, use_bias=bias, name="q_proj")
         self.out_proj = tf.keras.layers.Dense(embed_dim, use_bias=bias, name="out_proj")
 
-    # Copied from transformers.models.bart.modeling_tf_bart.TFBartAttention._shape with BART->whisper
     def _shape(self, tensor: tf.Tensor, seq_len: int):
         return tf.transpose(tf.reshape(tensor, (-1, seq_len, self.num_heads, self.head_dim)), (0, 2, 1, 3))
 
-    # Copied from transformers.models.bart.modeling_tf_bart.TFBartAttention.call with BART->whisper
     def call(
         self,
         hidden_states,
@@ -54,8 +52,6 @@ class TSAttention(tf.keras.layers.Layer):
     ):
         """Input shape: Batch x Time x Channel"""
 
-        # if key_value_states are provided this layer is used as a cross-attention layer
-        # for the encoder
         _, tgt_len, embed_dim = shape_list(hidden_states)
         src_len = tgt_len
         # get query proj

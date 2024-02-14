@@ -106,10 +106,10 @@ class GTT:
             the validation data
         cp : string
             checkpoint path
-        pm : WhisperFM
-            a pretrained Whisper model for time series data, if set to None, then will load model from huggingface
+        pm : TSFoundation
+            a pretrained model for time series data, if set to None, then will create new model
         optimizer : string or optimizer
-            the optimizer for gradient descent, if set to None, adamW will be used
+            the optimizer for gradient descent, if set to None, adam will be used
         batch_size : int, default is 256
             the batch size
         epochs : int, default is 10
@@ -200,7 +200,7 @@ class GTT:
         ndarray 
             y_pred
         ndarray
-            y_pred
+            y_true
         """
         df = self.du.normalize_and_encode(df)
         x, c, y = self._data_handler.extract_data4inference(df.values, input_len, pred_len, stride=1)
@@ -293,12 +293,6 @@ class GTT:
     def from_tsfoundation(cls, signals, foundation_path, cp=None):
         """
         load the model from files
-        
-        Parameters
-        ----------
-        model_path : string, default is None
-            the target folder whether the model files are located
-            If None, load models from the tempt folder
         """
         model = cls()
         configs = pickle.load(open(os.path.join(foundation_path,'configs.pkl'),'rb'))
@@ -319,7 +313,7 @@ SHUFFLE_BUFFER = 1024*1024*2
     
 class TSFoundation:
     '''
-    A time series model ready for end-task usages
+    A pretrained time series forecast model ready for end-task usages
     
     Parameters
     ----------
