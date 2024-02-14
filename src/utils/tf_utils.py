@@ -58,20 +58,5 @@ class NewGELU(keras.layers.Layer):
     """
     def call(self, x):
         return 0.5 * x * (1.0 + tf.tanh(math.sqrt(2.0 / math.pi) * (x + 0.044715 * tf.pow(x, 3.0))))
-    
-    
-class unbiased_mae_loss(keras.losses.Loss):
-    def __init__(self):
-        super(unbiased_mae_loss, self).__init__()
-        self.eps = 1e-5
-        self.mae = keras.losses.MeanAbsoluteError(reduction=tf.keras.losses.Reduction.NONE)
-    
-    def call(self, y_true, y_pred):
-        mask = tf.not_equal(y_true, 0)  
-        # y_true = tf.where(mask, y_true, tf.zeros_like(y_true))  
-        y_pred = tf.where(mask, y_pred, tf.zeros_like(y_pred))
-        loss = self.mae(y_true,y_pred)
-        loss = loss*tf.cast(tf.size(y_true),tf.float32)/(tf.math.count_nonzero(y_true,dtype=tf.float32)+1.0)
-        return loss
         
 
