@@ -10,6 +10,34 @@ import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
 
 def forecast(df, targets, covariates, timefeat, pred_len, pred_start, modelpath, autodiff=False):
+    """
+    zeroshot forecast api
+    
+    Parameters
+    ----------
+    df : dataframe
+        the historical data
+    targets: list of strings
+        target variables, prediction targets
+    covariates: list of strings
+        covariates
+    timefeat: string
+        datetime variable, timefeat can also be empty, i.e., timefeat=''
+    pred_len : int
+        prediction length, the number of future time steps to forecast
+    pred_start: int
+        prediction start position, it's N to last step in the historical data 
+    modelpath : string
+        the location of GTT model files 
+    autodiff : bool
+        whether do 1-order difference before prediction, sometimes set autodiff=True will boost prediction accuracy
+    
+        
+    Returns
+    -------
+    dict 
+        the forecast results
+    """
     try:
         df = df.ffill()
         if autodiff == False:
@@ -94,9 +122,6 @@ def plot_res(res):
         plt.subplot(len(res['targets']),1,1+k)
         plt.plot(res['xdata'][:len(target_var['values'])], target_var['values'], "k-",label=target_var['name'])
         plt.plot(res['xdata'][split_pos:], target_var['preds'], colors[k%6]+"-",label='Forecast')
-        
-        # plt.plot(list(range(len(res['xdata'][split_pos:]))), target_var['values'][split_pos:], "k-",label=target_var['name'])
-        # plt.plot(list(range(len(res['xdata'][split_pos:]))), target_var['preds'], colors[k%6]+"-",label='preds')
         plt.axvline(x = res['xdata'][split_pos], ls='--',color="y")
         
         plt.legend(loc='best', prop={'size': 6})
@@ -110,7 +135,7 @@ if __name__ == '__main__':
     covariates = []
     timefeat = 'Date'
     pred_len = 48
-    pred_start = 24
+    pred_start = 0
     modelchoice = 'small'
     autodiff = False
     modelpath = f'../../checkpoints/GTT-{modelchoice}'
