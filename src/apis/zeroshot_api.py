@@ -93,7 +93,7 @@ def plot_res(res):
     for target_var in res['targets']:
         plt.subplot(len(res['targets']),1,1+k)
         plt.plot(res['xdata'][:len(target_var['values'])], target_var['values'], "k-",label=target_var['name'])
-        plt.plot(res['xdata'][split_pos:], target_var['preds'], colors[k%6]+"-",label='preds')
+        plt.plot(res['xdata'][split_pos:], target_var['preds'], colors[k%6]+"-",label='Forecast')
         
         # plt.plot(list(range(len(res['xdata'][split_pos:]))), target_var['values'][split_pos:], "k-",label=target_var['name'])
         # plt.plot(list(range(len(res['xdata'][split_pos:]))), target_var['preds'], colors[k%6]+"-",label='preds')
