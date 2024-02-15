@@ -30,7 +30,7 @@ def forecast(df, targets, covariates, timefeat, pred_len, pred_start, modelpath,
     modelpath : string
         the location of GTT model files 
     autodiff : bool
-        whether do 1-order difference before prediction, sometimes set autodiff=True will boost prediction accuracy
+        whether do 1st-order difference before prediction, sometimes set autodiff=True will boost prediction accuracy
     
         
     Returns
