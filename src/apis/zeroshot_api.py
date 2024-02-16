@@ -30,7 +30,7 @@ def forecast(df, targets, covariates, timefeat, pred_len, pred_start, modelpath,
     modelpath : string
         the location of GTT model files 
     autodiff : bool
-        whether do 1st-order difference before prediction, sometimes set autodiff=True will boost prediction accuracy
+        whether do 1st-order differencing before prediction, sometimes set autodiff=True will boost prediction accuracy
     
         
     Returns
@@ -134,8 +134,8 @@ if __name__ == '__main__':
     targets = ['#Passengers']
     covariates = []
     timefeat = 'Date'
-    pred_len = 48
-    pred_start = 0
+    pred_len = 64
+    pred_start = 24
     modelchoice = 'small'
     autodiff = False
     modelpath = f'../../checkpoints/GTT-{modelchoice}'
