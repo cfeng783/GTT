@@ -1,8 +1,8 @@
 # Only the Curve Shape Matters: Training Foundation Models for Zero-Shot Multivariate Time Series Forecasting through Next Curve Shape Prediction
 
-# This repository provides only the inference component of GTT, with tiny and small-scale models available for conceptual experimentation. The complete version will be released at a later date.
+# This repository provides only the inference component of GTT, with tiny and small-scale models available for conceptual experimentation. The complete version is undergoing an internal administrative review and will be released at a later date.
 
-## Getting Started
+# Getting Started
 
 #### Install dependencies (with python 3.10) 
 
