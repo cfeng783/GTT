@@ -1,12 +1,16 @@
 # Only the Curve Shape Matters: Training Foundation Models for Zero-Shot Multivariate Time Series Forecasting through Next Curve Shape Prediction
 
-## Getting Started
+This repository provides the minimal code for running inference of GTT, with small-scale models available for conceptual experimentation. The complete version is undergoing an internal administrative review and will be released at a later date.
+
+# Getting Started
 
 #### Install dependencies (with python 3.10) 
 
 ```shell
 pip install -r requirements.txt
 ```
+
+## Run Experiments
 
 #### Run the zero-shot experiments
 
@@ -27,5 +31,6 @@ cd experiments
 python test_finetune.py --gpu [GPUs] --batch_size [BS] --mode [mode] --data [DS] --uni [uni] --epochs [eps]
 ```
 
-### Use GTT model for zero-shot forecast on your own data
-It is rather straightforward to use GTT models for zero-shot forecast on your own data, check the [tutorial](./tutorial.ipynb).
+## Use GTT models for zero-shot forecast on your own data
+
+It is rather straightforward to use GTT models for zero-shot forecast on your own data (even with only CPUs), check the [tutorial](./tutorial.ipynb).
