@@ -32,3 +32,10 @@ python test_finetune.py --gpu [GPUs] --batch_size [BS] --mode [mode] --data [DS]
 ## Use GTT models for zero-shot forecast on your own data
 
 It is rather straightforward to use GTT models for zero-shot forecast on your own data (even with only CPUs), check the [tutorial](./tutorial.ipynb).
+
+
+## Cite
+Cheng Feng, Long Huang, and Denis Krompass. 2024. General Time Transformer: an Encoder-only Foundation Model for Zero-Shot Multivariate
+Time Series Forecasting. In Proceedings of the 33rd ACM International Conference on Information and Knowledge Management (CIKM ’24), October
+21–25, 2024, Boise, ID, USA. ACM, New York, NY, USA, 5 pages. https:
+//doi.org/10.1145/3627673.3679931
