@@ -1,4 +1,4 @@
-This repository provides the minimal code for running inference of GTT, with small-scale models available for conceptual experimentation. The complete version is undergoing an internal administrative review and will be released at a later date.
+This repository provides the minimal code for running inference of GTT. 
 
 # Getting Started
 
